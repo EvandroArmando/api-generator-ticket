@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Str;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -18,11 +19,20 @@ class UserController extends Controller
     
   }
 
-
-
-  public function searchTiket(){
-
-
+  public function searchTiket($id){
+    $user = User::Where("tiket_id",$id)->first();
+    if (!$user) {
+      return response()->json( [ 
+        "error" =>true,
+        "message"=>"User does exist",
+       ],201
+       );
+    }
+    return response()->json( [ 
+      "error" =>false,
+      "message"=>$user,
+     ],201
+     );
 
   }
   public function createUser(Request $req){
@@ -39,46 +49,40 @@ class UserController extends Controller
         return response()->json($validator->errors(),400);
     }
     $image = $req->photo->hashName();
+    $path = $req->file('photo')->store('public');    
     $user = New User();
-    $path = $req->file('photo')->store('photo');    
     $user->name = $req->name;
     $user->photo = $image;    
     $user->email = $req->email;
     $user->occupation_area = $req->occupation_area;
     //verify if random number exists
     $users = [];
-    $resultado = [];
     $pin = 0;
     $count_users = User::count();
     for ($i=0; $i <$count_users ; $i++) { 
       $users[$i] = User::find($i);
     } 
-    for ($i=0; $i <$count_users ; $i++) { 
-      $pin = str::random(10);
-      if ($pin != $users[$i]->tiket_id) {
-       continue;
-      }
-      if ($pin != $users[$i]->tiket_id) {
-        break ;
-      }
-      if ($pin != $users[$i]->tiket_id) {
-        $pin = str::random(10);
-       }
-    } 
+    if ($count_users > 0) {  
+      for ($i=$count_users; $i<=0 ; $i--) { 
+        if ($pin == $users[$i]->tiket_id) {
+          $pin = str::random(10);
+         }
+      } 
+    }
+    $pin = str::random(10);
     $user->tiket_id = $pin;
     $user->link = env('APP_URL')."tickets/na-placa-do-dev/$pin";
-    $result = $this->model->save();
-    if (User::find($this->model->id)) {
+    $result = $user->save();
+    if (User::find($user->id)) {
        return response()->json( [ 
         "error" =>false,
-        "message"=>$this->model,
+        "message"=>$user,
        ],201
        );
     }
     return response()->json( [ 
         "error" =>true,
         "message"=>"There was an error saving, try again",
-        
     ],
     200
     );
