@@ -14,6 +14,11 @@ Route::get('/user', function (Request $request) {
 Route::post("/auth/register",[UserController::class,'createUser'])->name("createUser");
 Route::get("/tickets/na-placa-do-dev/{id}",[UserController::class,'searchTiket'])->name("searchTiket");
 
+
+Route::get('phpmyinfo', function () {
+    phpinfo(); 
+})->name('phpmyinfo');
+
 Route::get('/getfile/{name}', function ($name) {
     $media = User::where("photo",$name)->first();
     if ($media) {
