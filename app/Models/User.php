@@ -9,12 +9,12 @@ use Illuminate\Notifications\Notifiable;
 use MongoDB\Laravel\Eloquent\Model as Eloquent;
 
 
-class User extends Eloquent
+class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $connection = 'mongodb';
-    protected $table = 'users';
+    //protected $connection = 'mongodb';
+    //protected $table = 'users';
 
     /**
      * The attributes that are mass assignable.
